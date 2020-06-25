@@ -2,7 +2,7 @@
 Simple CLI utility, used to concatenate pdf files
 
 ## Installation steps:
-1. `git cone https://github.com/maciejewiczow/pdf-cat.git`
+1. `git clone https://github.com/maciejewiczow/pdf-cat.git`
 1. `npm install`
 1. `npm link`
 
