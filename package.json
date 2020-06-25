@@ -1,0 +1,24 @@
+{
+  "name": "pdf-cat",
+  "version": "1.0.0",
+  "description": "Commandline tool used to concatenate several pdf files into single one",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "pdf",
+    "combine",
+    "cat",
+    "concatenate"
+  ],
+  "author": "Maciej Adamus",
+  "license": "MIT",
+  "dependencies": {
+    "pdf-lib": "^1.6.1",
+    "yargs": "^15.3.1"
+  },
+  "bin": {
+    "pdf-cat": "./index.js"
+  }
+}
