@@ -1,14 +1,10 @@
 # pdf-cat
+Simple CLI utility, used to concatenate pdf files
+
 ## Installation steps:
-1. ```bash
-   git cone https://github.com/maciejewiczow/pdf-cat.git
-   ```
-1. ```bash
-   npm install
-   ```
-1. ```bash
-   npm link
-   ```
+1. `git cone https://github.com/maciejewiczow/pdf-cat.git`
+1. `npm install`
+1. `npm link`
 
 ## Usage
 ```bash
