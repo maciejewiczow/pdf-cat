@@ -18,3 +18,8 @@ or
 ```bash
 pdf-cat [Input Files] | [other program]
 ```
+
+### Help
+```bash
+pdf-cat -h
+```
