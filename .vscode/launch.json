@@ -12,7 +12,12 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\index.js",
-            "args": ["./testfiles/kod.pdf", "./testfiles/sprawko_dol.pdf","./testfiles/sprawko_gora.pdf"]
+            "args": [
+                "-a",
+                "--image-fit=center",
+                "./testfiles/kod.pdf",
+                "./testfiles/sprawko_gora.pdf",
+            ]
             // "args": ["--output \" \""]
         }
     ]
