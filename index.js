@@ -95,8 +95,7 @@ const createDrawConfig = (image, page, fitMode) => {
                 height: page.getHeight()
             };
         case imageFitModes.fitHeight: {
-            const scale = page.getHeight() / image.height;
-            const rescaled = image.scale(scale);
+            const rescaled = image.scale(page.getHeight() / image.height);
             return {
                 x: page.getWidth() / 2 - rescaled.width / 2,
                 y: 0,
@@ -105,8 +104,7 @@ const createDrawConfig = (image, page, fitMode) => {
             };
         }
         case imageFitModes.fitWidth: {
-            const scale = page.getWidth() / image.width;
-            const rescaled = image.scale(scale);
+            const rescaled = image.scale(page.getWidth() / image.width);
             return {
                 x: 0,
                 y: page.getHeight() / 2 - rescaled.height / 2,
@@ -120,9 +118,9 @@ const createDrawConfig = (image, page, fitMode) => {
 const getNumbersFromFileName = filePath =>
     +path.parse(filePath).name.replace(/[^0-9.]/g, '');
 
-(async () => {
-    const range = (start, end, step = 1) => new Array(end - start + 1).fill().map((x, i) => start + i * step)
+const rangeArray = (start, end, step = 1) => new Array(end - start + 1).fill().map((x, i) => start + i * step);
 
+(async () => {
     const {
         _: filePaths,
         descending = false,
@@ -132,12 +130,11 @@ const getNumbersFromFileName = filePath =>
         ignoreText = false
     } = argv;
 
-
     const files = xor(ascending, descending) ?
         filePaths.sort((a, b) => {
             const result = !ignoreText ?
                 a.localeCompare(b) :
-                getNumbersFromFileName(a) - getNumbersFromFileName(b)
+                getNumbersFromFileName(a) - getNumbersFromFileName(b);
 
             return (descending ? -1 : 1) * result;
         }) :
@@ -177,7 +174,7 @@ const getNumbersFromFileName = filePath =>
                 page.drawImage(imageOrDoc, createDrawConfig(imageOrDoc, page, imageFit))
             }
             if (imageOrDoc instanceof PDFDocument) {
-                const pages = await result.copyPages(imageOrDoc, range(0, imageOrDoc.getPageCount() - 1))
+                const pages = await result.copyPages(imageOrDoc, rangeArray(0, imageOrDoc.getPageCount() - 1))
                 pages.forEach(p => result.addPage(p))
             }
         })
