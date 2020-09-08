@@ -1,0 +1,31 @@
+{
+    "include": [
+        "src",
+        "types"
+    ],
+    "compilerOptions": {
+        "module": "commonjs",
+        "lib": [
+            "esnext"
+        ],
+        "target": "ES2016",
+        "importHelpers": true,
+        "sourceMap": true,
+        "rootDir": "./src",
+        "removeComments": false,
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true
+    }
+}
