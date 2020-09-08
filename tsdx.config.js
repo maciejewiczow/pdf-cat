@@ -8,7 +8,6 @@ module.exports = {
                 entry: path.resolve(process.cwd(), 'src/index.ts')
             }
         ));
-        console.log(config)
 
         return config;
     }
