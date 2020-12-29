@@ -23,11 +23,6 @@
         "test": "tsdx test",
         "lint": "tsdx lint"
     },
-    "husky": {
-        "hooks": {
-            "pre-commit": "tsdx lint"
-        }
-    },
     "keywords": [
         "pdf",
         "combine",
