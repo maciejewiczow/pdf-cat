@@ -7,6 +7,25 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch TS Program",
+            "program": "${workspaceFolder}/src/index.ts",
+            "args": [
+                "./testfiles/sprawko1.docx",
+                "./testfiles/kod.pdf",
+                "./testfiles/sprawko2.docx"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "preLaunchTask": "npm: build",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
