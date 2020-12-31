@@ -38,6 +38,7 @@
         "yargs": "^15.3.1"
     },
     "devDependencies": {
+        "@rollup/plugin-url": "^6.0.0",
         "@types/bluebird": "^3.5.32",
         "@types/bluebird-global": "^3.5.12",
         "@types/jest": "^26.0.13",
