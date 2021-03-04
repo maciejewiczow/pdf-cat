@@ -21,7 +21,6 @@ export type PreprocessorMap = Partial<Record<MimeType, Preprocessor | Preprocess
 
 const preprocessorMap: PreprocessorMap = {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': processDocFiles,
-    'text/markdown': createMarkdownPreprocessor
 }
 
 export const preprocess = (args: Argv<ProgramArgs>['argv']) =>  {
