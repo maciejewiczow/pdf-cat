@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 import fs from 'fs'
+import path from 'path'
 import { PDFDocument, PDFImage } from 'pdf-lib'
-import FileType from 'file-type'
 global.Promise = require('bluebird')
 
 import yargs from "./config/argv"
 import { xor, getNumbersFromFileName, readFileToBuffer, rangeArray } from './utils'
 import { createDrawConfig } from './utils/draw'
-import { processDocFiles } from './utils/processDocFiles'
-import path from 'path'
+import { FileDescriptor, preprocess } from './preprocessors'
+import { getFileType } from './utils/fileType'
 
 const { argv } = yargs
 
@@ -24,6 +24,8 @@ if ((argv.output === undefined || argv.output.trim().length === 0) && process.st
     process.exit(2)
 }
 
+const unlink = Promise.promisify(fs.unlink);
+
 (async () => {
     const {
         descending = false,
@@ -35,70 +37,70 @@ if ((argv.output === undefined || argv.output.trim().length === 0) && process.st
 
     const filePaths = argv._.map(val => val.toString())
 
-    const files = (
-            xor(ascending, descending) ? (
-                    filePaths.sort((a, b) => {
-                        const result = !ignoreText ?
-                            a.localeCompare(b) :
-                            getNumbersFromFileName(a) - getNumbersFromFileName(b)
+    const sorted = xor(ascending, descending) ? (
+        filePaths.sort((a, b) => {
+            const result = !ignoreText ?
+                a.localeCompare(b) :
+                getNumbersFromFileName(a) - getNumbersFromFileName(b)
 
-                        return (descending ? -1 : 1) * result
-                    })
-                ) : (
-                    filePaths
-                )
-        )
-        .map(str => path.resolve(process.cwd(), str))
+            return (descending ? -1 : 1) * result
+        })
+    ) : (
+        filePaths
+    )
 
-    const result = await PDFDocument.create()
-
-    const processedDocFileNames = await processDocFiles(files)
-
-    if (processedDocFileNames)
-        // replace doc file paths with paths to converted pdf files
-        for (const entry of processedDocFileNames.sort((a, b) => b.originalIndex - a.originalIndex))
-            files[entry.originalIndex] = entry.filePath
-
-    await Promise.map(files, async filePath => {
-        const buffer = await readFileToBuffer(filePath)
+    const files = await Promise.map(sorted, async (fileName, index): Promise<FileDescriptor> => {
+        const filePath = path.resolve(process.cwd(), fileName);
 
         return {
-            buffer,
-            filePath,
-        }
+            path: filePath,
+            orderNo: index,
+            type: await getFileType(filePath),
+        };
     })
-        .map(async ({ filePath, buffer }) => {
-            let type = await FileType.fromFile(filePath)
 
+    const preprocessedFiles = await preprocess(argv)(files);
+
+    // replace doc file paths with paths to converted pdf files
+    for (const entry of preprocessedFiles.sort((a, b) => b.orderNo - a.orderNo))
+        files[entry.orderNo] = entry
+
+    const resultDocument = await PDFDocument.create();
+
+    await Promise.map(files, async file => ({
+            ...file,
+            content: await readFileToBuffer(file.path)
+        }))
+        .map(async ({ path, content, type }) => {
             if (!type) {
-                console.error(`${filePath}: unknown file type. Skipping...`)
+                console.error(`${path}: unknown file type. Skipping...`)
                 return
             }
 
             if (type.mime === 'image/jpeg')
-                return result.embedJpg(buffer)
+                return resultDocument.embedJpg(content)
 
             if (type.mime === 'image/png')
-                return result.embedPng(buffer)
+                return resultDocument.embedPng(content)
 
             if (type.mime === 'application/pdf')
-                return PDFDocument.load(buffer)
+                return PDFDocument.load(content)
 
-            console.error(`${filePath}: unsupported file type (${type.mime}). Skipping...`)
+            console.error(`${path}: unsupported file type (${type.mime}). Skipping...`)
         })
         .map(async imageOrDoc => {
             if (imageOrDoc instanceof PDFImage) {
-                const page = result.addPage()
+                const page = resultDocument.addPage()
 
                 page.drawImage(imageOrDoc, createDrawConfig(imageOrDoc, page, imageFit))
             }
             if (imageOrDoc instanceof PDFDocument) {
-                const pages = await result.copyPages(imageOrDoc, rangeArray(0, imageOrDoc.getPageCount() - 1))
-                pages.forEach(p => result.addPage(p))
+                const pages = await resultDocument.copyPages(imageOrDoc, rangeArray(0, imageOrDoc.getPageCount() - 1))
+                pages.forEach(p => resultDocument.addPage(p))
             }
         })
 
-    const rawResult = await result.save()
+    const rawResult = await resultDocument.save()
 
     if (output) {
         const out = fs.createWriteStream(output)
@@ -107,14 +109,7 @@ if ((argv.output === undefined || argv.output.trim().length === 0) && process.st
         process.stdout.write(rawResult)
     }
 
-    const unlink = Promise.promisify(fs.unlink)
-
-    if (processedDocFileNames) {
-        await Promise.map(
-            processedDocFileNames,
-            ({ filePath }) => unlink(filePath)
-        )
-    }
+    await Promise.all(preprocessedFiles.map(({ path }) => unlink(path)))
 })()
     .catch((e: any) => {
         console.error('An error ocurred while the files were being processed!\n', e)
