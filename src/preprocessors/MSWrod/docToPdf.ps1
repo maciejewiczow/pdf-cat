@@ -36,21 +36,19 @@ Function Write-Stderr {
     $Host.UI.WriteErrorLine($errorMessage)
 };
 
-$word = New-Object -ComObject Word.Application
 try {
     $openedWordInstance = [Runtime.Interopservices.Marshal]::GetActiveObject('Word.Application')
+    Write-Stderr "Found active word instance followng docs open:"
+    foreach ($doc in $openedWordInstance.Documents) {
+        Write-Stderr "\t" + $doc.FullName
+    }
 }
 catch {
     $openedWordInstance = $null
+    Write-Stderr "No active word instance found"
 }
 
-if ($openedWordInstance) {
-    Write-Stderr "Found active word instance with docs:"
-    foreach ($doc in $openedWordInstance.Documents) {
-        Write-Stderr $doc.FullName
-    }
-}
-
+$word = New-Object -ComObject Word.Application
 foreach ($fileName in $files) {
     $file = Get-Item $fileName
 
@@ -58,18 +56,15 @@ foreach ($fileName in $files) {
         continue
     }
 
-    $hasBeenOpenBefore = $false
-
     if ($openedWordInstance) {
         $document = $openedWordInstance.Documents | Where-Object { ($_.FullName -eq $fileName) -or ($_.Name -eq $fileName) }
         if ($document) {
             Write-Stderr "Document $fileName is currently opened"
         }
-        $hasBeenOpenBefore = !!$document
+        Write-Stderr "Document $fileName was not opened in active instance"
     }
 
     if (!$document) {
-        Write-Stderr "Document $fileName was not opened in active instance"
         # FIXME: ogarnąć jak zablokować wyskakiwaniu okienka "Document is locked for editing" które blokuje cały skrypt
         $document = $word.Documents.OpenNoRepairDialog($file.FullName, $false, $true)
     }
@@ -77,11 +72,6 @@ foreach ($fileName in $files) {
     $pdf_filename = "$($file.DirectoryName)\$($prefix)$($file.BaseName).pdf"
 
     $document.SaveAs([ref] $pdf_filename, [ref] 17) # 17 = pdf
-
-    if (!$hasBeenOpenBefore) {
-        Write-Stderr "Closing $fileName"
-        $document.Close([ref] [Microsoft.Office.Interop.Word.WdSaveOptions]::wdDoNotSaveChanges)
-    }
 }
 
 $word.Quit()

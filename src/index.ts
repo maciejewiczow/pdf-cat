@@ -25,7 +25,7 @@ if ((argv.output === undefined || argv.output.trim().length === 0) && process.st
     process.exit(2)
 }
 
-const unlink = Promise.promisify(fs.unlink);
+const unlink = Promise.promisify(fs.unlink);/* (path: string) => console.log("unlinking " + path); */
 
 (async () => {
     const {
@@ -56,9 +56,9 @@ const unlink = Promise.promisify(fs.unlink);
 
     const resultDocument = await PDFDocument.create();
 
-    await Promise.map(files, async file => ({
+    await Promise.map(files, async ({content, ...file}) => ({
             ...file,
-            content: await readFileToBuffer(file.path)
+            content: content ?? await readFileToBuffer(file.path)
         }))
         .map(async ({ path, content, type }) => {
             if (!type) {
@@ -98,7 +98,7 @@ const unlink = Promise.promisify(fs.unlink);
         process.stdout.write(rawResult)
     }
 
-    await Promise.all(preprocessedFiles.map(({ path }) => unlink(path)))
+    await Promise.all(preprocessedFiles.map(({ path }) => (path.length > 0) && unlink(path)))
 })()
     .catch((e: any) => {
         console.error('An error ocurred while the files were being processed!\n', e)

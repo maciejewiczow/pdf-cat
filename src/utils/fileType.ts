@@ -9,16 +9,16 @@ export interface FileTypeResult {
 }
 
 export const getFileType = async (filePath: string): Promise<FileTypeResult | undefined> => {
-    const type = FileType.fromFile(filePath);
+    const type = await FileType.fromFile(filePath);
 
     if (type)
         return type;
 
     const { ext } = path.parse(filePath);
 
-    if (ext === 'md') {
+    if (ext === '.md') {
         return {
-            ext,
+            ext: ext.substr(1),
             mime: 'text/markdown'
         }
     }

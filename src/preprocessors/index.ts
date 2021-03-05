@@ -1,6 +1,7 @@
 import { Argv } from "yargs";
 import { ProgramArgs } from "../config/constants";
 import { MimeType, FileTypeResult } from "../utils/fileType";
+import { createMdPreprocessor } from "./markdown/mdToPdf";
 import { processDocFiles } from "./MSWrod/docToPdf";
 
 export interface FileDescriptor {
@@ -20,6 +21,7 @@ export type PreprocessorMap = Partial<Record<MimeType, Preprocessor | Preprocess
 
 const preprocessorMap: PreprocessorMap = {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': processDocFiles,
+    'text/markdown': createMdPreprocessor
 }
 
 export const preprocess = (args: Argv<ProgramArgs>['argv']) =>  {

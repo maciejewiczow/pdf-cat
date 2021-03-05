@@ -6,7 +6,7 @@ module.exports = {
     rollup: config => {
         config.plugins.unshift(
             url({
-                include: ['**/*.ps1'],
+                include: ['**/*.ps1', '**/*.css'],
                 limit: 0
             })
         )
