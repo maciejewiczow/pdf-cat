@@ -1,7 +1,6 @@
 import { Argv } from "yargs";
 import { ProgramArgs } from "../config/constants";
 import { MimeType, FileTypeResult } from "../utils/fileType";
-import { createMarkdownPreprocessor } from "./Markdown/markdownToPdf";
 import { processDocFiles } from "./MSWrod/docToPdf";
 
 export interface FileDescriptor {

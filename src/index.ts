@@ -6,10 +6,11 @@ import { PDFDocument, PDFImage } from 'pdf-lib'
 global.Promise = require('bluebird')
 
 import yargs from "./config/argv"
-import { xor, getNumbersFromFileName, readFileToBuffer, rangeArray } from './utils'
+import { readFileToBuffer, rangeArray } from './utils'
 import { createDrawConfig } from './utils/draw'
 import { FileDescriptor, preprocess } from './preprocessors'
 import { getFileType } from './utils/fileType'
+import { reorderFiles } from './sortFiles'
 
 const { argv } = yargs
 
@@ -28,36 +29,24 @@ const unlink = Promise.promisify(fs.unlink);
 
 (async () => {
     const {
-        descending = false,
-        ascending = false,
-        ignoreText = false,
         output,
         imageFit,
     } = argv
 
     const filePaths = argv._.map(val => val.toString())
 
-    const sorted = xor(ascending, descending) ? (
-        filePaths.sort((a, b) => {
-            const result = !ignoreText ?
-                a.localeCompare(b) :
-                getNumbersFromFileName(a) - getNumbersFromFileName(b)
+    const files = await Promise.map(
+        reorderFiles(filePaths, argv),
+        async (fileName, index): Promise<FileDescriptor> => {
+            const filePath = path.resolve(process.cwd(), fileName);
 
-            return (descending ? -1 : 1) * result
-        })
-    ) : (
-        filePaths
+            return {
+                path: filePath,
+                orderNo: index,
+                type: await getFileType(filePath),
+            };
+        }
     )
-
-    const files = await Promise.map(sorted, async (fileName, index): Promise<FileDescriptor> => {
-        const filePath = path.resolve(process.cwd(), fileName);
-
-        return {
-            path: filePath,
-            orderNo: index,
-            type: await getFileType(filePath),
-        };
-    })
 
     const preprocessedFiles = await preprocess(argv)(files);
 

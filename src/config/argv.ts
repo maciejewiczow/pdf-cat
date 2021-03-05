@@ -35,6 +35,11 @@ const yargs = (yargsConstructor as Argv<ProgramArgs>)
         type: 'boolean',
         conflicts: 'a'
     })
+    .option('i', {
+        alias: 'interactive',
+        description: 'Interactive mode. Allows for interactive file reordering.\nWill be ignored when no output file is specified (-o flag not used)',
+        type: 'boolean',
+    })
     .usage('Usage: $0 [OPTIONS] [FILES...]')
     .help()
     .version()

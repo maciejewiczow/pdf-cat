@@ -33,6 +33,7 @@
     "license": "MIT",
     "dependencies": {
         "bluebird": "^3.7.2",
+        "enquirer": "^2.3.6",
         "file-type": "^14.7.1",
         "pdf-lib": "^1.6.1",
         "yargs": "^15.3.1"
